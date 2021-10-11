@@ -37,3 +37,13 @@ class MethodObject(object):
 
     def __str__(self) -> str:
         return f"{self.class_name} {self.name} {self.descriptor}"
+
+if __name__ == "__main__":
+    # Lio/socket/client/Socket.emit(Ljava/lang/String;[Ljava/lang/Object;)Lio/socket/emitter/Emitter;
+    # Address: 0xFABC
+    method = MethodObject(
+        "Lio/socket/client/Socket;",
+        "emit",
+        "(Ljava/lang/String;[Ljava/lang/Object;)Lio/socket/emitter/Emitter;",
+        cache=0xFABC
+    )
