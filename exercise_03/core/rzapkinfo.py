@@ -1,10 +1,12 @@
+import os.path
+import tempfile
+import zipfile
 from functools import cached_property
 from typing import *
-from exercise_03.structure.methodobject import MethodObject
 
-import os.path
-import zipfile
-import tempfile
+import rzpipe
+from exercise_03.core.methodobject import MethodObject
+
 
 class RizinImp:
     def __init__(self, apk_filepath):
@@ -15,13 +17,27 @@ class RizinImp:
         with zipfile.ZipFile(self.apk_filepath) as apk:
             apk.extractall(path=self._tmp_dir)
 
+            # Path to AndroidManifest.xml
             self._manifest = os.path.join(self._tmp_dir, "AndroidManifest.xml")
-            
-            self._dex_list = [
+
+            # Open all dex with Rizin
+            dex_path_list = [
                 os.path.join(self._tmp_dir, filename)
                 for filename in apk.namelist()
                 if filename.startswith("classes") and filename.endswith(".dex")
             ]
+
+        self._rz = self._create_rizin(dex_path_list)
+
+    @staticmethod
+    def _create_rizin(dex_list):
+        # Open all dexes
+        rz = rzpipe.open(dex_list[0])
+        for dex_path in dex_list[1:]:
+            rz.cmd(f"o {dex_path}")
+
+        # Analyze cross-references
+        rz.cmd("aaa")
 
     @cached_property
     def permissions(self) -> List[str]:
@@ -30,32 +46,8 @@ class RizinImp:
 
         :return: a list of all permissions
         """
-        permission_list = []
-
-        # Initialize AXML Reader
-        axml_reader = AxmlReader(self._manifest)
-
-        # Iterator through all XML Structures
-        for structure in axml_reader:
-            # Get the name value of a structure
-            name_value = structure.get('Name', None)
-
-            # Check if the structures defines a permission
-            if name_value and axml_reader.get_string(name_value) == "uses-permission":
-                # Get the attributes of the XML structure
-                attributes = axml_reader.get_attributes(structure)
-
-                if not attributes:
-                    break
-
-                # Get the permission
-                str_value = attributes[0]["Value"]
-                permission = axml_reader.get_string(str_value)
-
-                # Append to the list
-                permission_list.append(permission)
-
-        return permission_list
+        # TODO: Implement this with AXML Reader
+        pass
 
     @property
     def all_methods(self) -> Set[MethodObject]:
@@ -66,33 +58,6 @@ class RizinImp:
         """
         # TODO: Implement this with command 'isj'
         pass
-
-    @property
-    def android_apis(self) -> Generator[None, None, MethodObject]:
-        """
-        Return all Android native APIs from given APK.
-
-        :return: a set of all Android native APIs MethodObject
-        """
-        return (
-            method
-            for method in self.all_methods
-            if method.is_android_api() and method.cache.is_imported
-        )
-
-    @property
-    def custom_methods(self) -> Generator[None, None, MethodObject]:
-        """
-        Return all custom methods from given APK.
-
-        :return: a set of all custom methods MethodObject
-        """
-        return (
-            method
-            for method in self.all_methods
-            if not method.is_imported
-        )
-
 
     def find_method(
         self,
@@ -110,6 +75,10 @@ class RizinImp:
         :return: a generator of MethodObject
         """
         # TODO: Implement this with command 'isj'
+        pass
+
+    def _get_method_by_address(self, address: int) -> MethodObject:
+        # TODO: Implememt this.
         pass
 
     def upperfunc(self, method_object: MethodObject) -> Set[MethodObject]:
@@ -132,7 +101,7 @@ class RizinImp:
         # TODO: Implement this with command 'axffj'
         pass
 
-    def get_method_bytecode(self, method_object: MethodObject) -> Set[MethodObject]:
+    def get_method_bytecode(self, method_object: MethodObject) -> Set[str]:
         """
         Return the corresponding bytecode according to the
         given class name and method name.
