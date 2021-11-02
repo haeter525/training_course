@@ -47,7 +47,7 @@ def entry_point(
 
         print(f"Method: {target}")
     elif any(find_upper, find_lower, list_inheritance, get_bytecode):
-        print("Please provide a target method via -=method")
+        print("Please provide a target method via --method")
         return
 
     if list_permissions:
