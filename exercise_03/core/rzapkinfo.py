@@ -1,5 +1,5 @@
+import os
 import os.path
-import tempfile
 import zipfile
 from functools import cached_property
 from typing import *
@@ -10,12 +10,12 @@ from exercise_03.core.methodobject import MethodObject
 
 class RizinImp:
     def __init__(self, apk_filepath):
-        # Acquire tmp folder
-        self._tmp_dir = tempfile.mkdtemp()
+        apk_name = os.path.splitext(os.path.basename(apk_filepath))[-2]
 
-        # Extract all contents into tmp
-        with zipfile.ZipFile(self.apk_filepath) as apk:
-            apk.extractall(path=self._tmp_dir)
+        # 1. Extract the APK contents
+        with zipfile.ZipFile(apk_filepath) as apk:
+            os.makedirs(apk_name)
+            apk.extractall(apk_name)
 
             # Path to AndroidManifest.xml
             self._manifest = os.path.join(self._tmp_dir, "AndroidManifest.xml")
@@ -56,7 +56,16 @@ class RizinImp:
 
         :return: a set of all method MethodObject
         """
-        # TODO: Implement this with command 'isj'
+        symbol_list = self._rz.cmdj('isj')
+
+        for symbol in symbol_list:
+            # Skip if the symbol is not a function or method
+            if symbol.get('type') not in ['FUNC', 'METH']:
+                continue
+
+            # Parse class name, method name, and descriptor
+            # e.g. La/b/c/d/BuildConfig.method.<init>()V
+
         pass
 
     def find_method(
