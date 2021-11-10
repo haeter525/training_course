@@ -1,3 +1,6 @@
+import sys
+sys.path.append(".")
+
 import functools
 import os.path
 from typing import Any, List
@@ -8,19 +11,19 @@ from exercise_03.core.rzapkinfo import RizinImp
 
 
 @click.command(no_args_is_help=True)
-@click.command(
+@click.option(
     "-a",
     "--apk",
     type=click.Path(exists=True, file_okay=True, dir_okay=False),
     required=True,
 )
-@click.command("-m", "--method", type=str)
-@click.command("--list-permissions", is_flag=True)
+@click.option("-m", "--method")
+@click.option("--list-permissions", is_flag=True)
 @click.option("--list-methods", is_flag=True)
 @click.option("--find-upper", is_flag=True)
 @click.option("--find-lower", is_flag=True)
 @click.option("--get-bytecode", is_flag=True)
-@click.option("--find-superclasses", is_flag=True)
+@click.option("--list-inheritance", is_flag=True)
 def entry_point(
     apk,
     method,
@@ -46,7 +49,7 @@ def entry_point(
             return
 
         print(f"Method: {target}")
-    elif any(find_upper, find_lower, list_inheritance, get_bytecode):
+    elif any([find_upper, find_lower, list_inheritance, get_bytecode]):
         print("Please provide a target method via --method")
         return
 
@@ -69,7 +72,7 @@ def entry_point(
         print("Class inheritance list")
         print("--------------------")
 
-        for index, entry in enumerate(apkinfo.superclass_relationships, start=1):
+        for index, entry in enumerate(apkinfo.superclass_relationships.items(), start=1):
             child, parents = entry
             print(f"{index:2>}. {child}")
             print(f"\t{parents}")
@@ -90,3 +93,7 @@ def display_list(data_list: List[Any], title: str):
         print(f"{index:2>}. {entry}")
 
     print("")
+
+
+if __name__ == "__main__":
+    entry_point()
