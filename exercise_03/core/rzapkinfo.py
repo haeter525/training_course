@@ -46,7 +46,7 @@ class RizinImp:
 
         :return: a list of all permissions
         """
-        # TODO: Implement this with AXML Reader
+        # AXML Reader
         pass
 
     @property
@@ -83,11 +83,10 @@ class RizinImp:
         :param descriptor: the descriptor of the Android API
         :return: a generator of MethodObject
         """
-        # TODO: Implement this with command 'isj'
+        # command 'isj'
         pass
 
     def _get_method_by_address(self, address: int) -> MethodObject:
-        # TODO: Implememt this.
         pass
 
     def upperfunc(self, method_object: MethodObject) -> Set[MethodObject]:
@@ -97,7 +96,7 @@ class RizinImp:
         :param method_object: the MethodObject instance
         :return: a set of all xref from functions
         """
-        # TODO: Implement this with command 'axtj'
+        # command 'axtj'
         pass
 
     def lowerfunc(self, method_object: MethodObject) -> Set[MethodObject]:
@@ -107,7 +106,7 @@ class RizinImp:
         :param method_object: the MethodObject instance
         :return: a set of all xref from functions
         """
-        # TODO: Implement this with command 'axffj'
+        # command 'axffj'
         pass
 
     def get_method_bytecode(self, method_object: MethodObject) -> Set[str]:
@@ -118,7 +117,7 @@ class RizinImp:
         :param method_object: the MethodObject instance
         :return: a generator of all bytecode instructions
         """
-        # TODO: Implement this with command 'pdfj'
+        # command 'pdfj'
         pass
 
     @property
@@ -130,5 +129,5 @@ class RizinImp:
         Usage:
         superclass_relationships[subclass] = {parent_class_1, parent_class_2, ...}
         """
-        # TODO: Implement this with command 'icg'
+        # command 'icg'
         pass
