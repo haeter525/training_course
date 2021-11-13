@@ -47,7 +47,22 @@ class RizinImp:
         :return: a list of all permissions
         """
         # AXML Reader
-        pass
+        reader = AxmlReader(self._manifest)
+        permission_list = set()
+
+        # Iterate through all XML nodes
+        for node in reader:
+            # Test if a node defines an APP permission
+            label = node.get("Name")
+            if label and reader.get_string(label) == "usespermission":
+                # Get the content of the node
+                attrs = reader.get_attributes(node)
+                if attrs:
+                    permission = reader.get_string(attrs[0]["Value"])
+                    # Collect the permission
+                    permission_list.add(permission)
+
+        return permission_list
 
     @property
     def all_methods(self) -> Set[MethodObject]:
@@ -56,14 +71,15 @@ class RizinImp:
 
         :return: a set of all method MethodObject
         """
+        # 1. Send the command "isj"
         symbol_list = self._rz.cmdj('isj')
 
         for symbol in symbol_list:
-            # Skip if the symbol is not a function or method
+            # 2. Skip if the symbol is not a function or method
             if symbol.get('type') not in ['FUNC', 'METH']:
                 continue
 
-            # Parse class name, method name, and descriptor
+            # 3. Parse class name, method name, and descriptor
             # e.g. La/b/c/d/BuildConfig.method.<init>()V
 
         pass
@@ -83,10 +99,17 @@ class RizinImp:
         :param descriptor: the descriptor of the Android API
         :return: a generator of MethodObject
         """
-        # command 'isj'
+        # 1. Iterate through all methods
+
+        # 2. Compare with the class names, method names, and descriptors
+
         pass
 
     def _get_method_by_address(self, address: int) -> MethodObject:
+        # 1. Iterate through all methods
+
+        # 2. Compare with the addresses
+
         pass
 
     def upperfunc(self, method_object: MethodObject) -> Set[MethodObject]:
@@ -96,7 +119,18 @@ class RizinImp:
         :param method_object: the MethodObject instance
         :return: a set of all xref from functions
         """
-        # command 'axtj'
+        # 1. Move the cursor to the target method
+
+        # 2. Send the command "axtj"
+
+        # 3. Skip those xrefs that are not method calls
+
+        # 4. Get the address of a calling method
+
+        # 5. Find the corresponding method object by the address
+
+        # 6. Collect the method object
+
         pass
 
     def lowerfunc(self, method_object: MethodObject) -> Set[MethodObject]:
@@ -106,7 +140,18 @@ class RizinImp:
         :param method_object: the MethodObject instance
         :return: a set of all xref from functions
         """
-        # command 'axffj'
+        # 1. Move the cursor the the target method
+
+        # 2. Send the command "axff"
+
+        # 3. Skip those xrefs that are not method calls
+
+        # 4. Get the address of a calling method
+
+        # 5. Find the corresponding method object by the address
+
+        # 6. Collect the method object
+
         pass
 
     def get_method_bytecode(self, method_object: MethodObject) -> Set[str]:
@@ -117,7 +162,18 @@ class RizinImp:
         :param method_object: the MethodObject instance
         :return: a generator of all bytecode instructions
         """
-        # command 'pdfj'
+        # 0. Parse the method address
+
+        # 1. Move the cursor to the address
+
+        # 2. Send the command "pdfj"
+
+        # 3. Get the bytecode list
+
+        # 4. Iterate through all the bytecodes
+
+        # 5. Find the Samli representation
+
         pass
 
     @property
@@ -129,5 +185,10 @@ class RizinImp:
         Usage:
         superclass_relationships[subclass] = {parent_class_1, parent_class_2, ...}
         """
-        # command 'icg'
+        # 1. Send the command "icg"
+
+        # 2. Iterate through all the lines
+
+        # 3. Parse a node and its link to the children
+
         pass
