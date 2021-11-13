@@ -92,7 +92,7 @@ METHOD_ADDRESS = 0x0005
 rz.cmd(f"s {METHOD_ADDRESS}")
 
 # 2. Get the information
-xref_list = rz.cmdj(f"axtj")
+xref_list = rz.cmdj(f"axff")
 
 for xref in xref_list:
     # 3. Skip those xrefs that are not related to method calls
