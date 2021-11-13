@@ -71,6 +71,8 @@ class RizinImp:
 
         :return: a set of all method MethodObject
         """
+        method_list = []
+
         # 1. Send the command "isj"
         symbol_list = self._rz.cmdj('isj')
 
@@ -82,7 +84,21 @@ class RizinImp:
             # 3. Parse class name, method name, and descriptor
             # e.g. La/b/c/d/BuildConfig.method.<init>()V
 
-        pass
+            # - Parse the address
+            address = symbol['vaddr']
+
+            # - Parse the class name
+            class_name = symbol['realname'][:symbol.index('.method.')] + ';'
+
+            # - Parse the method name and descriptor
+            method_signature = symbol['realname'][symbol.index('.method.')+7:]
+            method_name = method_signature[:method_signature.index('(')]
+            descriptor = method_signature[method_signature.index('('):]
+
+            method_object = MethodObject(class_name, method_name, descriptor, cache=address)
+            method_list.append(method_object)
+
+        return method_list
 
     def find_method(
         self,
@@ -100,17 +116,17 @@ class RizinImp:
         :return: a generator of MethodObject
         """
         # 1. Iterate through all methods
-
-        # 2. Compare with the class names, method names, and descriptors
-
-        pass
+        for method in self.all_methods:
+            # 2. Compare with the class names, method names, and descriptors
+            if method.class_name == class_name and method.name == method_name and method.descriptor == descriptor:
+                return method
 
     def _get_method_by_address(self, address: int) -> MethodObject:
         # 1. Iterate through all methods
-
-        # 2. Compare with the addresses
-
-        pass
+        for method in self.all_methods:
+            # 2. Compare with the addresses
+                if method.cache == address:
+                    return method
 
     def upperfunc(self, method_object: MethodObject) -> Set[MethodObject]:
         """
@@ -119,19 +135,29 @@ class RizinImp:
         :param method_object: the MethodObject instance
         :return: a set of all xref from functions
         """
+        upper_list = []
+
         # 1. Move the cursor to the target method
+        self._rz.cmd(f"s {method_object.cache}")
 
         # 2. Send the command "axtj"
+        xref_list = self._rz.cmdj("axtj")
 
-        # 3. Skip those xrefs that are not method calls
+        for xref in xref_list:
+            # 3. Skip those xrefs that are not method calls
+            if xref['type'] != 'CALL':
+                continue
 
-        # 4. Get the address of a calling method
+            # 4. Get the address of a calling method
+            address = xref.get('from', None)
 
-        # 5. Find the corresponding method object by the address
+            # 5. Find the corresponding method object by the address
+            calling_method = self._get_method_by_address(address)
 
-        # 6. Collect the method object
-
-        pass
+            # 6. Collect the method object
+            upper_list.append(calling_method)
+            
+        return upper_list
 
     def lowerfunc(self, method_object: MethodObject) -> Set[MethodObject]:
         """
@@ -140,19 +166,29 @@ class RizinImp:
         :param method_object: the MethodObject instance
         :return: a set of all xref from functions
         """
+        lower_list = []
+
         # 1. Move the cursor the the target method
+        self._rz.cmd(f"s {method_object.cache}")
 
         # 2. Send the command "axff"
+        xref_list = self._rz.cmdj("axff")
 
-        # 3. Skip those xrefs that are not method calls
+        for xref in xref_list:
+            # 3. Skip those xrefs that are not method calls
+            if xref['type'] != 'CALL':
+                continue
 
-        # 4. Get the address of a calling method
+            # 4. Get the address of a calling method
+            address = xref.get('from', None)
 
-        # 5. Find the corresponding method object by the address
+            # 5. Find the corresponding method object by the address
+            called_method = self._get_method_by_address(address)
 
-        # 6. Collect the method object
+            # 6. Collect the method object
+            lower_list.append(called_method)
 
-        pass
+        return lower_list
 
     def get_method_bytecode(self, method_object: MethodObject) -> Set[str]:
         """
@@ -163,18 +199,23 @@ class RizinImp:
         :return: a generator of all bytecode instructions
         """
         # 0. Parse the method address
+        address = method_object.cache
 
         # 1. Move the cursor to the address
+        self._rz.cmd(f"s {address}")
 
         # 2. Send the command "pdfj"
+        method_information = self._rz.cmdj("pdfj")
 
         # 3. Get the bytecode list
+        bytecode_list = method_information['ops']
 
         # 4. Iterate through all the bytecodes
+        for bytecode in bytecode_list:
+            # 5. Find the Samli representation
+            smali_representation = bytecode['disasm']
 
-        # 5. Find the Samli representation
-
-        pass
+            yield smali_representation
 
     @property
     def superclass_relationships(self) -> Dict[str, Set[str]]:
@@ -185,10 +226,25 @@ class RizinImp:
         Usage:
         superclass_relationships[subclass] = {parent_class_1, parent_class_2, ...}
         """
+        inherence_tree = dict()
+
         # 1. Send the command "icg"
+        graph_connections = rz.cmdj("icg").splitlines()
 
         # 2. Iterate through all the lines
+        for graph_item in graph_connections:
+            # 3. Parse a node and its link to the children
+            if graph_item.startswith("agn"):
+                # Define a node
+                parent = graph_item.split()[1]
+                if not parent.endswith(';'): parent = parent + ';'
+                inherence_tree[parent] = []
 
-        # 3. Parse a node and its link to the children
+            elif graph_item.startswith("age"):
+                # Connect nodes to its parent
+                children = graph_item.split()[2:]
+                for child in children:
+                    if not child.endswith(';'): child = child + ';'
+                inherence_tree[parent].append(children)
 
-        pass
+        return inherence_tree
