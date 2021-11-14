@@ -6,6 +6,7 @@ from typing import *
 
 import rzpipe
 from exercise_03.core.methodobject import MethodObject
+from exercise_03.core.axmlreader import AxmlReader
 
 
 class RizinImp:
@@ -16,6 +17,8 @@ class RizinImp:
         with zipfile.ZipFile(apk_filepath) as apk:
             os.makedirs(apk_name)
             apk.extractall(apk_name)
+
+            self._tmp_dir = apk_name
 
             # Path to AndroidManifest.xml
             self._manifest = os.path.join(self._tmp_dir, "AndroidManifest.xml")
@@ -39,6 +42,8 @@ class RizinImp:
         # Analyze cross-references
         rz.cmd("aaa")
 
+        return rz
+
     @cached_property
     def permissions(self) -> List[str]:
         """
@@ -54,7 +59,7 @@ class RizinImp:
         for node in reader:
             # Test if a node defines an APP permission
             label = node.get("Name")
-            if label and reader.get_string(label) == "usespermission":
+            if label and reader.get_string(label) == "uses-permission":
                 # Get the content of the node
                 attrs = reader.get_attributes(node)
                 if attrs:
@@ -88,10 +93,10 @@ class RizinImp:
             address = symbol['vaddr']
 
             # - Parse the class name
-            class_name = symbol['realname'][:symbol.index('.method.')] + ';'
+            class_name = symbol['realname'][:symbol['realname'].index('.method.')] + ';'
 
             # - Parse the method name and descriptor
-            method_signature = symbol['realname'][symbol.index('.method.')+7:]
+            method_signature = symbol['realname'][symbol['realname'].index('.method.')+7:]
             method_name = method_signature[:method_signature.index('(')]
             descriptor = method_signature[method_signature.index('('):]
 
@@ -149,7 +154,7 @@ class RizinImp:
                 continue
 
             # 4. Get the address of a calling method
-            address = xref.get('from', None)
+            address = xref.get('fcn_addr', None)
 
             # 5. Find the corresponding method object by the address
             calling_method = self._get_method_by_address(address)
@@ -172,7 +177,7 @@ class RizinImp:
         self._rz.cmd(f"s {method_object.cache}")
 
         # 2. Send the command "axff"
-        xref_list = self._rz.cmdj("axff")
+        xref_list = self._rz.cmdj("axffj")
 
         for xref in xref_list:
             # 3. Skip those xrefs that are not method calls
@@ -226,10 +231,10 @@ class RizinImp:
         Usage:
         superclass_relationships[subclass] = {parent_class_1, parent_class_2, ...}
         """
-        inherence_tree = dict()
+        inherence_tree = {}
 
         # 1. Send the command "icg"
-        graph_connections = rz.cmdj("icg").splitlines()
+        graph_connections = self._rz.cmdj("icg").splitlines()
 
         # 2. Iterate through all the lines
         for graph_item in graph_connections:
