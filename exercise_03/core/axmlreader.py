@@ -138,12 +138,12 @@ class AxmlReader(object):
         data_type = header_structure[0]['value']
         assert data_type == type, f"The type of the file content is {data_type}. Prehaps it's not a AndroidManifest?"
 
-        header_size = header_structure[2]['value']
+        header_size = header_structure[1]['value']
         assert header_size == size, f"The size of the header is {header_size}. Prehaps it's not a AndroidManifest?"
 
     @staticmethod
     def _check_file_size(expected_size, real_size):
-        assert expected_size < real_size, f"Decleared size ({expected_size} bytes) is larger than total size({real_size})."
+        assert expected_size <= real_size, f"Decleared size ({expected_size} bytes) is larger than total size({real_size})."
 
     def _move_ptr(self, offset):
         self._ptr += offset
