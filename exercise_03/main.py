@@ -60,10 +60,10 @@ def entry_point(
         display_list(apkinfo.all_methods, "Methods")
 
     if find_upper:
-        display_list(apkinfo.upperfunc(target), "Crossreferences TO function")
+        display_list(apkinfo.upperfunc(target), "Cross-references from")
 
     if find_lower:
-        display_list(apkinfo.lowerfunc(target), "Crossreferences FROM function")
+        display_list(apkinfo.lowerfunc(target), "Cross-references to")
 
     if get_bytecode:
         display_list(apkinfo.get_method_bytecode(target), "Bytecodes")
