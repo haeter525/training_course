@@ -11,7 +11,10 @@ from exercise_03.core.axmlreader import AxmlReader
 
 class RizinImp:
     def __init__(self, apk_filepath):
-        apk_name = os.path.splitext(os.path.basename(apk_filepath))[-2]
+        apk_name = '_apk_' + os.path.splitext(os.path.basename(apk_filepath))[-2]
+        if os.path.isdir(apk_name):
+            import shutil
+            shutil.rmtree(apk_name)
 
         # 1. Extract the APK contents
         with zipfile.ZipFile(apk_filepath) as apk:
