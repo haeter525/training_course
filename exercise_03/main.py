@@ -49,7 +49,7 @@ def entry_point(
             return
 
         print(f"Method: {target}")
-    elif any([find_upper, find_lower, list_inheritance, get_bytecode]):
+    elif any([find_upper, find_lower, get_bytecode]):
         print("Please provide a target method via --method")
         return
 
