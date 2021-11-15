@@ -143,13 +143,15 @@ class RizinImp:
         :param method_object: the MethodObject instance
         :return: a set of all xref from functions
         """
-        upper_list = []
+        upper_list = set()
 
         # 1. Move the cursor to the target method
         self._rz.cmd(f"s {method_object.cache}")
 
         # 2. Send the command "axtj"
         xref_list = self._rz.cmdj("axtj")
+        if not xref_list:
+            return []
 
         for xref in xref_list:
             # 3. Skip those xrefs that are not method calls
@@ -163,9 +165,9 @@ class RizinImp:
             calling_method = self._get_method_by_address(address)
 
             # 6. Collect the method object
-            upper_list.append(calling_method)
+            upper_list.add(calling_method)
             
-        return upper_list
+        return list(upper_list)
 
     def lowerfunc(self, method_object: MethodObject) -> Set[MethodObject]:
         """
@@ -174,13 +176,15 @@ class RizinImp:
         :param method_object: the MethodObject instance
         :return: a set of all xref from functions
         """
-        lower_list = []
+        lower_list = set()
 
         # 1. Move the cursor the the target method
         self._rz.cmd(f"s {method_object.cache}")
 
         # 2. Send the command "axff"
         xref_list = self._rz.cmdj("axffj")
+        if not xref_list:
+            return []
 
         for xref in xref_list:
             # 3. Skip those xrefs that are not method calls
@@ -188,15 +192,15 @@ class RizinImp:
                 continue
 
             # 4. Get the address of a calling method
-            address = xref.get('from', None)
+            address = xref.get('to', None)
 
             # 5. Find the corresponding method object by the address
             called_method = self._get_method_by_address(address)
 
             # 6. Collect the method object
-            lower_list.append(called_method)
+            lower_list.add(called_method)
 
-        return lower_list
+        return list(lower_list)
 
     def get_method_bytecode(self, method_object: MethodObject) -> Set[str]:
         """
