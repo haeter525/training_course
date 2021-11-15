@@ -241,22 +241,26 @@ class RizinImp:
         inherence_tree = {}
 
         # 1. Send the command "icg"
-        graph_connections = self._rz.cmdj("icg").splitlines()
+        graph_connections = self._rz.cmd("icg").splitlines()
 
         # 2. Iterate through all the lines
         for graph_item in graph_connections:
             # 3. Parse a node and its link to the children
-            if graph_item.startswith("agn"):
-                # Define a node
-                parent = graph_item.split()[1]
-                if not parent.endswith(';'): parent = parent + ';'
-                inherence_tree[parent] = []
-
-            elif graph_item.startswith("age"):
+            if graph_item.startswith("age"):
                 # Connect nodes to its parent
-                children = graph_item.split()[2:]
+                elements = graph_item.split()
+
+                parent = elements[1]
+                children = elements[2:]
+
+                if not parent.endswith(';'):
+                    parent =  parent + ';'
                 for child in children:
                     if not child.endswith(';'): child = child + ';'
-                inherence_tree[parent].append(children)
+
+                list = inherence_tree.get(parent, [])
+                list.extend(children)
+
+                inherence_tree[parent] = list
 
         return inherence_tree
