@@ -99,7 +99,7 @@ class RizinImp:
             class_name = symbol['realname'][:symbol['realname'].index('.method.')] + ';'
 
             # - Parse the method name and descriptor
-            method_signature = symbol['realname'][symbol['realname'].index('.method.')+7:]
+            method_signature = symbol['realname'][symbol['realname'].index('.method.')+8:]
             method_name = method_signature[:method_signature.index('(')]
             descriptor = method_signature[method_signature.index('('):]
 
