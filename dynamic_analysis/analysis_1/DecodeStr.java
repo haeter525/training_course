@@ -15,9 +15,7 @@ public class DecodeStr {
     }
 
     public static void main(String[] args) {
-        int value[] = {20, 21, -24255};
-
-        String decodedStr = decodeStr(value[0], value[1], value[2]);
+        String decodedStr = decodeStr(20, 21, -24255);
         System.out.println(decodedStr);
     }
 }
